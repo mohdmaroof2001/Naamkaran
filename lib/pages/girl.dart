@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 // import 'dart:js';
+// import 'dart:js';
 // import 'dart:html';
 
 import 'package:flutter/material.dart';
@@ -34,7 +35,7 @@ class _GirlsState extends State<GirlsList> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
     categoryCall();
-    nameList(3, 2);
+    // nameList(3, 2);
 
     // .getUsers().then((userFromServer) {
     //   setState(() {
@@ -87,6 +88,14 @@ class _GirlsState extends State<GirlsList> with SingleTickerProviderStateMixin {
                 },
                 icon: Icon(
                   Icons.favorite_border_rounded,
+                  size: 30,
+                )),
+            IconButton(
+                onPressed: () {
+                  showSearch(context: context, delegate: SearchDemo(namesArr));
+                },
+                icon: Icon(
+                  Icons.search,
                   size: 30,
                 ))
           ],
@@ -147,15 +156,17 @@ class _GirlsState extends State<GirlsList> with SingleTickerProviderStateMixin {
                 nameShow(),
               ],
             ),
-            // Center(
-            //   child: CircularProgressIndicator(
-            //     // value: progress.toDouble(),
-            //     strokeWidth: 3,
-            //     backgroundColor: Colors.white,
-            //     color: Colors.pink,
-            //     // valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
-            //   ),
-            // ),
+            if (namesArr.isEmpty) ...[
+              Center(
+                child: CircularProgressIndicator(
+                  // value: progress.toDouble(),
+                  strokeWidth: 3,
+                  backgroundColor: Colors.white,
+                  color: Colors.red,
+                  // valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                ),
+              ),
+            ]
           ],
         ),
       ),
@@ -173,6 +184,7 @@ class _GirlsState extends State<GirlsList> with SingleTickerProviderStateMixin {
         catArr.add(CategoryDemo.fromJson(item));
       });
     }
+    nameList(3, 2);
   }
 
   search() {
@@ -206,12 +218,13 @@ class _GirlsState extends State<GirlsList> with SingleTickerProviderStateMixin {
   }
 
   nameShow() {
+    bool isFav = true;
     // return SizedBox();
     return Padding(
       padding: EdgeInsets.only(left: 15, right: 15, top: 140),
       child: Column(
         children: [
-          search(),
+          // search(),
           SizedBox(height: 5),
           Expanded(
             child: Container(
@@ -285,10 +298,15 @@ class _GirlsState extends State<GirlsList> with SingleTickerProviderStateMixin {
                                               content:
                                                   Text("Add to Favorite")));
                                     },
-                                    icon: Icon(
-                                      Icons.favorite_outline_rounded,
-                                      color: Colors.pink,
-                                    )),
+                                    icon: isFav
+                                        ? const Icon(
+                                            Icons.favorite_outline_rounded,
+                                            color: Colors.pink,
+                                          )
+                                        : const Icon(
+                                            Icons.favorite_rounded,
+                                            color: Colors.pink,
+                                          )),
                                 IconButton(
                                     onPressed: () async {
                                       await FlutterClipboard.copy(
@@ -354,4 +372,182 @@ class _GirlsState extends State<GirlsList> with SingleTickerProviderStateMixin {
   //   );
   //   print("Data hai ye ${data}");
   // }
+
+}
+
+class SearchDemo extends SearchDelegate {
+  List<NamesDemo> SearchName;
+  SearchDemo(this.SearchName);
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    // throw UnimplementedError();
+    return [
+      IconButton(
+          onPressed: () {
+            query = "";
+          },
+          icon: Icon(Icons.close_rounded)),
+    ];
+  }
+
+  @override
+  Widget? buildLeading(BuildContext context) {
+    // throw UnimplementedError();
+    return IconButton(
+        onPressed: () {
+          close(context, null);
+        },
+        icon: Icon(Icons.arrow_back_rounded));
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    // throw UnimplementedError();
+    List<NamesDemo> searchQuery = [];
+    for (var item in SearchName) {
+      if (item.name!.toLowerCase().contains(query.toLowerCase())) {
+        searchQuery.add(item);
+      }
+    }
+    return Stack(
+      children: [
+        Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child: Image.asset(
+            "images/home.png",
+            fit: BoxFit.cover,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
+          child: ListView.builder(
+              itemCount: searchQuery.length,
+              itemBuilder: (context, indexNo) {
+                return Column(
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.orange[50],
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      child: ListTile(
+                        title: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              searchQuery[indexNo].name.toString(),
+                              style:
+                                  TextStyle(fontSize: 22, color: Colors.pink),
+                            ),
+                            SizedBox(
+                              height: 5,
+                            ),
+                            SizedBox(
+                              width: 200,
+                              child: Text(
+                                searchQuery[indexNo].meaning.toString(),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                // softWrap: ,
+                                style: TextStyle(
+                                    fontSize: 18, color: Colors.black),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 5,
+                    )
+                  ],
+                );
+              }),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    // throw UnimplementedError();
+    List<NamesDemo> searchQuery = [];
+    for (var item in SearchName) {
+      if (item.name!.toLowerCase().contains(query.toLowerCase())) {
+        searchQuery.add(item);
+      }
+    }
+    if (searchQuery.isEmpty) {
+      return const Center(
+        child: Text("No Data Found"),
+      );
+    } else {
+      return Stack(
+        children: [
+          Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            child: Image.asset(
+              "images/home.png",
+              fit: BoxFit.cover,
+            ),
+          ),
+          SizedBox(
+            height: 50,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
+            child: ListView.builder(
+                itemCount: searchQuery.length,
+                itemBuilder: (context, indexNo) {
+                  return Column(
+                    children: [
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: Colors.orange[50],
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        child: ListTile(
+                          title: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                searchQuery[indexNo].name.toString(),
+                                style:
+                                    TextStyle(fontSize: 22, color: Colors.pink),
+                              ),
+                              SizedBox(
+                                height: 5,
+                              ),
+                              SizedBox(
+                                width: 200,
+                                child: Text(
+                                  searchQuery[indexNo].meaning.toString(),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  // softWrap: ,
+                                  style: TextStyle(
+                                      fontSize: 18, color: Colors.black),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 5,
+                      )
+                    ],
+                  );
+                }),
+          ),
+        ],
+      );
+    }
+  }
 }

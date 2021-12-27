@@ -74,7 +74,8 @@ class _FavListState extends State<FavList> {
                               IconButton(
                                   onPressed: () {
                                     print("Work");
-                                    deletfavname(indexNo);
+                                    // deletfavname();
+                                    getdata();
                                   },
                                   icon: Icon(
                                     Icons.highlight_remove,
@@ -106,14 +107,17 @@ class _FavListState extends State<FavList> {
     // print("Data hai ye ${data}");
   }
 
-  deletfavname(int IndexNo) async {
-    var temp = [];
-    temp = data;
-    temp.removeAt(IndexNo);
-    setState(() {
-      // data = temp[IndexNo];
-    });
-    // AddCityname();
-    getdata();
-  }
+  // deletfavname() async {
+  //   SharedPreferences preferences = await SharedPreferences.getInstance();
+  //   setState(() {
+  //     data = preferences.remove("FavData") as List<String>;
+  //   });
+  //   // var temp = [];
+  //   // temp = data;
+  //   // temp.removeAt(IndexNo);
+  //   // setState(() {
+  //   //   // data = temp[IndexNo];
+  //   // });
+  //   // // AddCityname();
+  // }
 }
